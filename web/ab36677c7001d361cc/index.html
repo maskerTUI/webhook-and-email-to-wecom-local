@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<script>
+  // 缺省尾斜杠时自动补上，避免相对路径资源(./app.js/./style.css)解析到根目录导致白屏
+  (function () {
+    var p = location.pathname || '';
+    if (p && !p.endsWith('/') && !/\.[a-z0-9]+$/i.test(p)) {
+      location.replace(p + '/' + (location.search || '') + (location.hash || ''));
+    }
+  })();
+</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>企业微信 · 群管理</title>
+<link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+<header>
+  <h1>企业微信 · 群管理</h1>
+  <div class="token-bar">
+    <label>Admin Token
+      <input id="adminToken" type="password" placeholder="WECOM_WEBHOOK_TOKEN" />
+    </label>
+    <button id="fetchToken" title="内网任意机器可一键拉取；若网络受限无法获取，可在输入框粘贴 WECOM_WEBHOOK_TOKEN 后点保存">获取 Token</button>
+    <button id="saveToken">保存</button>
+    <span id="connStatus" class="status">未登录</span>
+    <span class="token-hint">内网任意机器可点「获取 Token」直接拉取；若部署在受限网络无法获取，可手动粘贴服务器配置的 <code>WECOM_WEBHOOK_TOKEN</code> 后点「保存」。</span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="create">拉群</button>
+  <button class="tab-btn" data-tab="send">往群里发消息</button>
+  <button class="tab-btn" data-tab="user">往用户发消息</button>
+  <button class="tab-btn" data-tab="list">查看群</button>
+  <button class="tab-btn" data-tab="routes">路由配置</button>
+  <button class="tab-btn" data-tab="mail">邮件账号</button>
+  <button class="tab-btn" data-tab="sendlog">发送记录</button>
+</nav>
+
+<main>
+  <!-- 拉群 -->
+  <section class="tab-pane active" id="tab-create">
+    <h2>拉群（创建群 + 把应用号绑进群）</h2>
+    <p class="hint">调用 <code>POST /api/chats</code> → 企微 <code>appchat/create</code>。群主 userid 必须在「应用可见范围」内。</p>
+
+    <form id="formCreate">
+      <div class="row">
+        <label>群 chatid
+          <input name="chatid" required placeholder="例: projrelease20260615 (仅字母/数字, 1-32 字符)" />
+        </label>
+        <label>群名
+          <input name="name" required placeholder="例: 项目发布通知" />
+        </label>
+      </div>
+      <label>群主 userid
+        <input name="owner" required placeholder="例: zhangsan" />
+      </label>
+      <label>成员 userid（每行一个，或用 | , ; 分隔）
+        <textarea name="members" rows="5" required placeholder="zhangsan&#10;lisi&#10;wangwu"></textarea>
+      </label>
+      <div class="actions">
+        <button type="submit">拉群</button>
+        <span class="status" id="createStatus"></span>
+      </div>
+    </form>
+  </section>
+
+  <!-- 发消息 -->
+  <section class="tab-pane" id="tab-send">
+    <h2>往群里发消息</h2>
+    <p class="hint">调用 <code>POST /api/chats/:chatid/messages</code>。应用号必须在该群内（先用「拉群」建群）。</p>
+
+    <form id="formSend">
+      <label>群 chatid
+        <input name="chatid" required placeholder="例: projrelease20260614 (仅字母/数字)" />
+      </label>
+      <div class="row">
+        <label>消息类型
+          <select name="type">
+            <option value="text">text</option>
+            <option value="markdown">markdown</option>
+            <option value="news">news</option>
+          </select>
+        </label>
+      </div>
+      <label id="contentLabel">消息内容
+        <textarea name="content" rows="6" placeholder="text / markdown 消息体"></textarea>
+      </label>
+      <label id="payloadLabel" hidden>news payload (JSON)
+        <textarea name="payload" rows="8" placeholder='{"articles":[{"title":"标题","description":"描述","url":"https://...","picurl":"https://..."}]}'></textarea>
+      </label>
+      <div class="actions">
+        <button type="submit">发送</button>
+        <span class="status" id="sendStatus"></span>
+      </div>
+    </form>
+  </section>
+
+  <!-- 发消息（单聊：给指定用户发） -->
+  <section class="tab-pane" id="tab-user">
+    <h2>往指定用户发消息（应用号单聊）</h2>
+    <p class="hint">调用 <code>POST /api/users/:userid/messages</code> → 企微 <code>message/send</code>，<code>touser</code> 走 userid 列表。目标用户必须在「应用可见范围」内。</p>
+
+    <form id="formUser">
+      <label>接收人 userid（多人用 | , ; 或换行分隔，最多 1000 个）
+        <textarea name="userids" rows="3" required placeholder="YOUR_USERID&#10;或 YOUR_USERID|zhangsan|lisi"></textarea>
+      </label>
+      <div class="row">
+        <label>消息类型
+          <select name="type">
+            <option value="text">text</option>
+            <option value="markdown">markdown</option>
+            <option value="news">news</option>
+          </select>
+        </label>
+      </div>
+      <label id="userContentLabel">消息内容
+        <textarea name="content" rows="6" placeholder="text / markdown 消息体"></textarea>
+      </label>
+      <label id="userPayloadLabel" hidden>news payload (JSON)
+        <textarea name="payload" rows="8" placeholder='{"articles":[{"title":"标题","description":"描述","url":"https://...","picurl":"https://..."}]}'></textarea>
+      </label>
+      <div class="actions">
+        <button type="submit">发送</button>
+        <span class="status" id="userStatus"></span>
+      </div>
+    </form>
+  </section>
+
+  <!-- 查看群 -->
+  <section class="tab-pane" id="tab-list">
+    <h2>查看群信息</h2>
+    <p class="hint">调用 <code>GET /api/chats/:chatid</code> → 企微 <code>appchat/get</code>。返回群主、成员列表等。</p>
+
+    <form id="formGet">
+      <label>群 chatid
+        <input name="chatid" required placeholder="例: projrelease20260615" />
+      </label>
+      <div class="actions">
+        <button type="submit">查询</button>
+        <span class="status" id="getStatus"></span>
+      </div>
+    </form>
+    <pre id="getResult" class="result"></pre>
+
+    <h2 style="margin-top:24px">拉人入群</h2>
+    <p class="hint">调用 <code>PATCH /api/chats/:chatid</code> → 企微 <code>appchat/update</code>，提交 <code>add_user_list</code>。成员 userid 用逗号 / 换行 / 分号分隔，可一次提交多人。</p>
+    <form id="formAdd">
+      <div class="row">
+        <label>群 chatid
+          <input name="chatid" required placeholder="例: projrelease20260615" />
+        </label>
+        <label>要加入的成员 userid（多个用逗号分隔）
+          <input name="userids" required placeholder="例: zhangsan,lisi,wangwu" />
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit">拉人入群</button>
+        <span class="status" id="addStatus"></span>
+      </div>
+    </form>
+    <pre id="addResult" class="result"></pre>
+
+    <h2 style="margin-top:24px">踢人出群</h2>
+    <p class="hint">调用 <code>PATCH /api/chats/:chatid</code> → 企微 <code>appchat/update</code>，提交 <code>del_user_list</code>。从群中移除成员（群主不可被移除）。</p>
+    <form id="formDel">
+      <div class="row">
+        <label>群 chatid
+          <input name="chatid" required placeholder="例: projrelease20260615" />
+        </label>
+        <label>要移除的成员 userid（多个用逗号分隔）
+          <input name="userids" required placeholder="例: zhangsan,lisi" />
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit">踢人出群</button>
+        <span class="status" id="delStatus"></span>
+      </div>
+    </form>
+    <pre id="delResult" class="result"></pre>
+
+    <h2 style="margin-top:24px">解散群聊</h2>
+    <p class="hint">调用 <code>POST /api/chats/:chatid/dismiss</code> → 企微 <code>appchat/dismiss</code>。仅限当前应用创建的群，且不可恢复。</p>
+    <form id="formDismiss">
+      <label>群 chatid
+        <input name="chatid" required placeholder="例: projrelease20260615" />
+      </label>
+      <div class="actions">
+        <button type="submit">解散群聊</button>
+        <span class="status" id="dismissStatus"></span>
+      </div>
+    </form>
+    <pre id="dismissResult" class="result"></pre>
+
+    <h2 style="margin-top:24px">撤回群消息</h2>
+    <p class="hint">调用 <code>POST /api/chats/:chatid/revoke</code> → 企微 <code>appchat/revoke</code>。不填 jobid 时，自动取该群最近一次群发的 jobid（来自发送记录库）。</p>
+    <form id="formRevoke">
+      <div class="row">
+        <label>群 chatid
+          <input name="chatid" required placeholder="例: projrelease20260615" />
+        </label>
+        <label>jobid（可选，留空则自动取最近一次）
+          <input name="jobid" placeholder="如 4_1603337930_170948" />
+        </label>
+      </div>
+      <div class="actions">
+        <button type="submit">撤回</button>
+        <span class="status" id="revokeStatus"></span>
+      </div>
+    </form>
+    <pre id="revokeResult" class="result"></pre>
+  </section>
+
+  <!-- 发送记录 -->
+  <section class="tab-pane" id="tab-sendlog">
+    <h2>发送记录</h2>
+    <p class="hint">按时间查询所有对外发送（群聊 / 单聊），含<strong>源方式</strong>（web / route / cli）、<strong>目的方式</strong>（chat / user）、<strong>内容</strong>与<strong>jobid</strong>。记录来自 SQLite（<code>recv.db</code> 的 <code>send_log</code> 表，保留 90 天）。</p>
+
+    <form id="formSendLog" class="row" style="align-items:flex-end">
+      <label>开始时间
+        <input type="datetime-local" name="from" />
+      </label>
+      <label>结束时间
+        <input type="datetime-local" name="to" />
+      </label>
+      <label>最多条数
+        <input type="number" name="limit" value="200" min="1" max="2000" style="width:120px" />
+      </label>
+      <div class="actions" style="margin:0">
+        <button type="submit">查询</button>
+        <span class="status" id="sendLogStatus"></span>
+      </div>
+    </form>
+
+    <table id="sendLogTable" class="routes-table" style="margin-top:14px">
+      <thead>
+        <tr>
+          <th>时间</th>
+          <th>源方式</th>
+          <th>目的方式</th>
+          <th>内容</th>
+          <th>jobid</th>
+          <th>状态</th>
+        </tr>
+      </thead>
+      <tbody id="sendLogBody"></tbody>
+    </table>
+    <div id="sendLogEmpty" class="result" hidden>暂无记录</div>
+  </section>
+
+  <!-- 路由配置 -->
+  <section class="tab-pane" id="tab-routes">
+    <h2>路由配置（接收渠道 → 发送渠道）</h2>
+    <p class="hint">
+      把「接收渠道」收到的消息按模板渲染后，经「发送渠道」推送出去。配置保存在 <code>routes.json</code>；接收到的邮件 / webhook 消息存入 SQLite（<code>recv.db</code>），保留 24 小时后自动清理，不写入任何文本文件。
+      <br />接收渠道仅支持两种：<b>已生成的邮箱账号</b>（在「邮件账号」页生成，经内置 SMTP 收信）/ <b>webhook</b>（外部系统 POST 到 <code>/recv/&lt;routeId&gt;[/code]</code>，地址由本页生成并展示，接收端运行在独立的 <b>8787</b> 端口，与管理界面 3005 隔离；保存后可在列表「接收地址」列复制完整地址）。
+      发送渠道：<b>群聊</b>（appchat/send）/ <b>用户</b>（单聊）。
+    </p>
+
+    <div class="actions">
+      <button type="button" id="btnNewRoute">+ 新建路由</button>
+      <button type="button" id="btnRefreshRoutes">刷新</button>
+      <span class="status" id="routesStatus"></span>
+    </div>
+
+    <table id="routesTable" class="routes-table">
+      <thead>
+        <tr><th>名称</th><th>接收渠道</th><th>发送渠道</th><th>状态</th><th>接收地址 (webhook)</th><th>操作</th></tr>
+      </thead>
+      <tbody id="routesBody"></tbody>
+    </table>
+
+    <!-- 编辑 / 新建表单 -->
+    <form id="formRoute" hidden style="margin-top:18px;border-top:1px solid #ddd;padding-top:14px;">
+      <input type="hidden" name="rid" />
+      <label>路由名称
+        <input name="name" required placeholder="例: 邮件→技术群" />
+      </label>
+      <div class="row">
+        <label>接收渠道类型
+          <select name="sourceType">
+            <option value="local">已生成的邮箱账号 (本地 SMTP)</option>
+            <option value="webhook">webhook (外部推送)</option>
+            <option value="syslog">syslog (UDP/TCP 监听)</option>
+          </select>
+        </label>
+        <label>发送渠道类型
+          <select name="targetType">
+            <option value="chat">群聊</option>
+            <option value="user">用户 (单聊)</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- 本地邮箱源字段 -->
+      <fieldset id="localFields" hidden>
+        <legend>本地邮箱源</legend>
+        <p class="hint">选择一个在「邮件账号」页生成的本地邮箱账号，发往该地址的邮件会被推送到下方发送渠道。</p>
+        <label>本地邮箱账号
+          <select name="localAccount"></select>
+        </label>
+      </fieldset>
+
+      <!-- webhook 源字段 -->
+      <fieldset id="webhookFields" hidden>
+        <legend>webhook 源</legend>
+        <label>鉴权 code（外部系统需在 URL 末尾带上；留空则不校验）
+          <input name="webhookCode" placeholder="随机字符串，如 k9s2x" />
+        </label>
+        <p class="hint" id="webhookUrlHint">保存后这里会生成完整接收地址：<code>POST /recv/&lt;routeId&gt;[/code]</code></p>
+      </fieldset>
+
+      <!-- syslog 源字段 -->
+      <fieldset id="syslogFields" hidden>
+        <legend>syslog 源</legend>
+        <p class="hint">每条 syslog 路由独立监听一个 UDP/TCP 端口，设备把 syslog 指向该端口即触发路由。端口范围 1-65535，多条路由端口不能重复。</p>
+        <label>监听端口
+          <input name="syslogPort" type="number" min="1" max="65535" placeholder="如 1514" />
+        </label>
+        <label>协议
+          <select name="syslogProtocol">
+            <option value="udp">UDP（推荐）</option>
+            <option value="tcp">TCP</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <!-- 目标字段 -->
+      <div class="row">
+        <label id="targetChatWrap">群 chatid
+          <input name="targetChatid" placeholder="例: YOUR_CHATID" />
+        </label>
+        <label id="targetUserWrap" hidden>接收人 userid
+          <input name="targetUserid" placeholder="例: YOUR_USERID (多人用 | 分隔)" />
+        </label>
+      </div>
+
+      <label>消息模板（可用占位符，留空则用默认格式）
+        <textarea name="template" rows="6" placeholder="📧 新邮件&#10;来自: {{from}}&#10;主题: {{subject}}&#10;&#10;{{body}}"></textarea>
+      </label>
+      <p class="hint" id="tplHint">
+        邮件变量：<code>{{from}}</code> <code>{{to}}</code> <code>{{subject}}</code> <code>{{date}}</code> <code>{{body}}</code>（正文纯文本）。
+        webhook 变量：POST body 的任意字段（如 <code>{{title}}</code>），原始 JSON 为 <code>{{_raw}}</code>。
+        syslog 变量：<code>{{message}}</code> <code>{{host}}</code> <code>{{appname}}</code> <code>{{severity}}</code>(0-7) <code>{{severityName}}</code> <code>{{facility}}</code> <code>{{procid}}</code> <code>{{timestamp}}</code> <code>{{_srcIp}}</code>，原始报文为 <code>{{_raw}}</code>。
+      </p>
+
+      <div class="actions">
+        <button type="submit">保存</button>
+        <button type="button" id="btnCancelRoute">取消</button>
+        <span class="status" id="routeFormStatus"></span>
+      </div>
+    </form>
+    <div id="routeDetail" class="result" hidden></div>
+  </section>
+
+  <!-- 邮件账号 -->
+  <section class="tab-pane" id="tab-mail">
+    <h2>邮件账号（本地内置 SMTP 接收）</h2>
+    <p class="hint">
+      在此生成仅供本工具接收邮件用的邮箱账号（地址形如 <code>&lt;账号&gt;@&lt;域名&gt;</code>，域名为 <code id="mailDomain">wecom-mail.local</code>，SMTP 端口 <code id="mailPort">2525</code>）。
+      任何能连到本机该端口的邮件系统，把信发到这些地址，工具就会收下、存盘，并由对应「本地邮箱」路由推送到企业微信。
+    </p>
+
+    <div class="actions">
+      <button type="button" id="btnGenMail">+ 生成邮箱账号</button>
+      <button type="button" id="btnRefreshMail">刷新</button>
+      <span class="status" id="mailStatus"></span>
+    </div>
+
+    <table id="mailTable" class="routes-table">
+      <thead>
+        <tr><th>邮箱地址</th><th>密码</th><th>创建时间</th><th>操作</th></tr>
+      </thead>
+      <tbody id="mailBody"></tbody>
+    </table>
+
+    <div id="mailDetail" class="result" hidden></div>
+  </section>
+</main>
+
+<footer>
+  <small>私有化企业微信 · 仅供内部使用</small>
+</footer>
+
+<script src="./app.js"></script>
+</body>
+</html>

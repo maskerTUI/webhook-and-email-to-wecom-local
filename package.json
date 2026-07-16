@@ -1,0 +1,18 @@
+{
+  "name": "2026-06-14-22-39-41",
+  "version": "1.0.0",
+  "description": "零依赖的 Node.js 18+ 脚本，往私有化部署的企业微信「自建应用」推送文本 / 图文 / Markdown 消息。四种使用模式：",
+  "main": "config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "imapflow": "^1.4.6",
+    "mailparser": "^3.9.14",
+    "smtp-server": "^3.19.2"
+  }
+}

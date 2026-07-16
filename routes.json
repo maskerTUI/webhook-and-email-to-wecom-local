@@ -1,0 +1,69 @@
+[
+  {
+    "id": "r_8212cf453200",
+    "name": "1",
+    "enabled": true,
+    "source": {
+      "type": "local",
+      "local": "example-local"
+    },
+    "target": {
+      "type": "user",
+      "userid": "YOUR_USERID"
+    },
+    "template": "",
+    "createdAt": "2026-07-07T11:48:08.445Z",
+    "updatedAt": "2026-07-07T11:48:08.445Z"
+  },
+  {
+    "id": "r_781e106f692e",
+    "name": "1",
+    "enabled": true,
+    "source": {
+      "type": "webhook",
+      "code": ""
+    },
+    "target": {
+      "type": "user",
+      "userid": "YOUR_USERID"
+    },
+    "template": "",
+    "createdAt": "2026-07-07T11:48:51.646Z",
+    "updatedAt": "2026-07-07T11:48:51.646Z"
+  },
+  {
+    "id": "r_e8ee854d1ceb",
+    "name": "2",
+    "enabled": true,
+    "source": {
+      "type": "webhook",
+      "code": "your-route-code"
+    },
+    "target": {
+      "type": "chat",
+      "chatid": "YOUR_CHATID"
+    },
+    "template": "",
+    "createdAt": "2026-07-07T13:04:19.000Z",
+    "updatedAt": "2026-07-07T13:04:19.000Z"
+  },
+  {
+    "id": "r_55701253fd1a",
+    "name": "syslog-to-user",
+    "enabled": true,
+    "source": {
+      "type": "syslog",
+      "syslog": {
+        "port": 1514,
+        "protocol": "udp"
+      }
+    },
+    "target": {
+      "type": "user",
+      "userid": "YOUR_USERID"
+    },
+    "template": "",
+    "createdAt": "2026-07-09T14:00:50.287Z",
+    "updatedAt": "2026-07-09T14:00:50.287Z"
+  }
+]

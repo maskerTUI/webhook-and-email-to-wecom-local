@@ -1,0 +1,195 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f5f6fa;
+  color: #1f2329;
+}
+header {
+  background: #2b5fd9;
+  color: #fff;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+header h1 { margin: 0; font-size: 18px; font-weight: 600; }
+.token-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.token-bar label { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.token-bar input {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 13px;
+  min-width: 240px;
+}
+.token-bar input::placeholder { color: rgba(255,255,255,0.6); }
+.token-bar button {
+  background: #fff;
+  color: #2b5fd9;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.token-bar button:disabled { background: rgba(255,255,255,0.4); color: rgba(255,255,255,0.7); cursor: not-allowed; }
+.token-hint {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+.token-hint code { background: rgba(0,0,0,0.25); padding: 1px 5px; border-radius: 3px; }
+.status { font-size: 12px; padding: 2px 8px; border-radius: 10px; }
+.status.ok { background: #d4f4dd; color: #1a8240; }
+.status.err { background: #fde2e2; color: #b42318; }
+.status.pending { background: #fff3cd; color: #946c00; }
+
+nav.tabs {
+  background: #fff;
+  border-bottom: 1px solid #e5e6eb;
+  display: flex;
+  padding: 0 24px;
+}
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 14px 20px;
+  font-size: 14px;
+  color: #4e5969;
+  cursor: pointer;
+  font-weight: 500;
+}
+.tab-btn.active {
+  color: #2b5fd9;
+  border-bottom-color: #2b5fd9;
+}
+.tab-btn:hover:not(.active) { color: #1f2329; }
+
+main { max-width: 1920px; margin: 24px auto; padding: 0 24px; }
+.tab-pane { display: none; background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.tab-pane.active { display: block; }
+.tab-pane h2 { margin: 0 0 4px; font-size: 16px; }
+.hint { color: #86909c; font-size: 12px; margin: 0 0 16px; }
+.hint code { background: #f2f3f5; padding: 1px 5px; border-radius: 3px; }
+
+form { display: flex; flex-direction: column; gap: 14px; }
+.row { display: flex; gap: 14px; flex-wrap: wrap; }
+.row > label { flex: 1; min-width: 200px; }
+label { display: flex; flex-direction: column; font-size: 13px; color: #4e5969; gap: 4px; }
+input, select, textarea {
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid #c9cdd4;
+  border-radius: 4px;
+  background: #fff;
+  color: #1f2329;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #2b5fd9;
+  box-shadow: 0 0 0 2px rgba(43,95,217,0.15);
+}
+textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+.actions { display: flex; align-items: center; gap: 12px; }
+button[type="submit"] {
+  background: #2b5fd9;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+button[type="submit"]:hover { background: #1e4cb8; }
+button[type="submit"]:disabled { background: #86909c; cursor: not-allowed; }
+
+.result {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 14px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  max-height: 360px;
+  overflow: auto;
+  margin-top: 16px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+footer { text-align: center; color: #86909c; font-size: 12px; padding: 20px 0 40px; }
+
+/* 路由配置 */
+.routes-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+.routes-table th, .routes-table td { border: 1px solid #e5e6eb; padding: 8px 10px; text-align: left; vertical-align: middle; }
+.routes-table th { background: #f2f3f5; color: #4e5969; font-weight: 600; }
+.routes-table tr:nth-child(even) td { background: #fafbfc; }
+.routes-table code { background: #f2f3f5; padding: 1px 5px; border-radius: 3px; }
+
+/* 发送记录表 */
+.routes-table .log-content { max-width: 420px; word-break: break-all; white-space: pre-wrap; }
+.routes-table td.ok { color: #2ba471; font-weight: 600; }
+.routes-table td.err { color: #d54941; font-weight: 600; }
+.routes-table .muted { color: #c9cdd4; }
+input[type="datetime-local"], input[type="number"] { font: inherit; padding: 6px 8px; border: 1px solid #c9cdd4; border-radius: 4px; }
+.route-ops { display: flex; gap: 6px; flex-wrap: wrap; }
+.route-ops button {
+  background: #fff; color: #2b5fd9; border: 1px solid #c9cdd4; border-radius: 4px;
+  padding: 4px 10px; font-size: 12px; cursor: pointer; font-weight: 500;
+}
+.route-ops button:hover { border-color: #2b5fd9; }
+.route-ops button.del { color: #b42318; border-color: #f0c2bd; }
+.route-ops button.del:hover { background: #fde2e2; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+.badge.on { background: #d4f4dd; color: #1a8240; }
+.badge.off { background: #fde2e2; color: #b42318; }
+form fieldset { border: 1px solid #e5e6eb; border-radius: 6px; padding: 14px; margin: 0; display: flex; flex-direction: column; gap: 14px; }
+form fieldset legend { font-size: 13px; color: #4e5969; font-weight: 600; padding: 0 6px; }
+
+/* 邮件账号页按钮 */
+#mailBody .copy, #mailBody .del {
+  background: #fff; color: #2b5fd9; border: 1px solid #c9cdd4; border-radius: 4px;
+  padding: 4px 12px; font-size: 12px; cursor: pointer; font-weight: 500;
+}
+#mailBody .copy:hover { border-color: #2b5fd9; }
+#mailBody .del { color: #b42318; border-color: #f0c2bd; }
+#mailBody .del:hover { background: #fde2e2; }
+
+/* 复制按钮（路由 / 详情通用） */
+.copy {
+  background: #fff; color: #2b5fd9; border: 1px solid #c9cdd4; border-radius: 4px;
+  padding: 3px 10px; font-size: 12px; cursor: pointer; font-weight: 500; margin-left: 6px;
+}
+.copy:hover { border-color: #2b5fd9; background: #f2f5ff; }
+.reveal {
+  background: #fff; color: #4e5969; border: 1px solid #c9cdd4; border-radius: 4px;
+  padding: 3px 10px; font-size: 12px; cursor: pointer; font-weight: 500; margin-left: 4px;
+}
+.reveal:hover { border-color: #86909c; background: #f7f8fa; }
+.reveal:disabled { color: #c9cdd4; cursor: default; }
+
+/* 路由列表「接收地址」列 */
+.recv-cell { max-width: 480px; }
+.recv-cell .recv-url {
+  display: inline-block; max-width: 400px; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; vertical-align: middle; word-break: break-all;
+}
+#routeDetail code {
+  display: inline-block; max-width: 90%; overflow-wrap: anywhere; vertical-align: middle;
+}
+#btnGenMail {
+  background: #2b5fd9; color: #fff; border: none; border-radius: 4px;
+  padding: 8px 20px; font-weight: 600; cursor: pointer;
+}
+#btnGenMail:hover { background: #1e4cb8; }
+#btnRefreshMail {
+  background: #fff; color: #2b5fd9; border: 1px solid #c9cdd4; border-radius: 4px;
+  padding: 8px 20px; font-weight: 600; cursor: pointer;
+}
+label.checkbox { flex-direction: row; align-items: center; gap: 6px; }

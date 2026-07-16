@@ -1,0 +1,17 @@
+# 依赖
+node_modules/
+
+# 运行时数据 / 数据库（含接收记录，可能含敏感内容）
+recv.db
+recv.db-shm
+recv.db-wal
+
+# 本地日志
+server.log
+*.log
+
+# 本地运行态 / 私有配置（含真实凭证，勿提交）
+.workbuddy/
+
+# 说明：config.js / mail/accounts.json / routes.json 已做脱敏处理并提交为模板，
+# 但若你在本地填入真实凭证，请改为使用 config.local.js 并自行加入忽略列表。
